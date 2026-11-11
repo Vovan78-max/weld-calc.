@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#12141a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Сварочный калькулятор</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon192.png">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#12141a;--card:#1c2029;--card2:#232836;--line:#2e3547;--txt:#e8ecf4;--dim:#9aa4b8;--acc:#ff8c1a;--acc2:#ffb35c;--ok:#4caf7d;--bad:#e05a5a}
+body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;min-height:100vh;padding-bottom:86px}
+.app{max-width:640px;margin:0 auto;padding:14px}
+h1{font-size:22px;margin:4px 0 12px}
+h2{font-size:18px;margin:14px 0 8px}
+.sub{color:var(--dim);font-size:14px;line-height:1.45;margin:6px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0}
+.card.res{background:linear-gradient(160deg,#2a1c10,#1c2029);border-color:#4a3010}
+.big{font-size:38px;font-weight:800;color:var(--acc)}
+.mid{font-size:22px;font-weight:700;color:var(--acc2)}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row .card{flex:1;min-width:130px}
+.lbl{color:var(--dim);font-size:13px;margin-bottom:2px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{display:block;width:100%;background:var(--card2);color:var(--txt);border:1px solid var(--line);border-radius:12px;padding:14px;font-size:16px;font-weight:600;text-align:left;cursor:pointer;margin:6px 0}
+.btn:active{background:#2c3348}
+.btn.acc{background:var(--acc);color:#1a0e00;border-color:var(--acc);text-align:center}
+.btn.sel{border-color:var(--acc);box-shadow:0 0 0 2px #ff8c1a55}
+.btn small{display:block;color:var(--dim);font-weight:400;font-size:13px;margin-top:3px}
+.chip{display:inline-block;padding:6px 12px;border:1px solid var(--line);border-radius:20px;background:var(--card2);font-size:14px;margin:4px 6px 4px 0;cursor:pointer}
+.chip.sel{background:var(--acc);color:#1a0e00;border-color:var(--acc);font-weight:700}
+.tabs{position:fixed;bottom:0;left:0;right:0;background:#0d0f14;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:6px 2px 12px;z-index:10}
+.tab{background:none;border:none;color:var(--dim);font-size:10px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 2px}
+.tab .ic{font-size:20px}
+.tab.on{color:var(--acc)}
+input[type=range]{width:100%;height:36px;accent-color:var(--acc)}
+select,input[type=number],input[type=text]{width:100%;background:var(--card2);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:16px}
+.hint{background:#1a2430;border-left:3px solid var(--acc);border-radius:8px;padding:8px 10px;font-size:13px;color:#cfe0f0;margin:8px 0}
+.warn{background:#2a1414;border-left:3px solid var(--bad)}
+.note{color:var(--dim);font-size:12px;margin-top:6px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--dim);font-weight:600}
+.hero{background:linear-gradient(160deg,#3a2410,#1c2029);border-radius:16px;padding:20px 16px;margin-bottom:12px;text-align:center}
+.hero h1{margin:8px 0 4px}
+.wl-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.wl-card{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:18px 10px;text-align:center;cursor:pointer;font-size:16px;font-weight:600}
+.wl-card .em{font-size:30px;display:block;margin-bottom:6px}
+.toggle{display:flex;align-items:center;gap:10px;margin:10px 0;font-size:15px}
+.toggle input{width:22px;height:22px;accent-color:var(--acc)}
+.del{color:var(--bad);background:none;border:none;font-size:16px;cursor:pointer;padding:4px 8px}
+.logo{text-align:center;font-size:44px;padding-top:40px}
+@media(min-width:500px){.grid{grid-template-columns:1fr 1fr 1fr}}
+</style>
+</head>
+<body>
+<div id="app" class="app"></div>
+<nav class="tabs" id="tabs"></nav>
+<script>
+
+var METALS=[
+ {id:'steel',name:'Сталь обычная',em:'🔩',hint:'Ст3, 09Г2С — самое частое: каркасы, гаражи, ворота, прицепы.',
+  mma:['МР-3 С','АНО-21','УОНИ-13/55'],mig:'Св-08Г2С (ER70S-6)',tig:'ВТ-1-4',gas:'Углекислота CO2 или смесь 80/20',
+  cur:1.0,preheat:'',ppre:0},
+ {id:'inox',name:'Нержавейка',em:'✨',hint:'12Х18Н10Т, AISI 304/321 — ёмкости, трапы, декор.',
+  mma:['ЦЛ-11','ОК 61.30'],mig:'ER308L',tig:'ER308L',gas:'Аргон 99.99',
+  cur:0.9,preheat:'',ppre:0},
+ {id:'alum',name:'Алюминий',em:'🪙',hint:'АМг, АД31 — баки, борта, рамы. Требует чистой кромки.',
+  mma:['ОЗА-1 (трудно, лучше TIG/MIG)'],mig:'ER4043 или ER5356',tig:'ER4043',gas:'Аргон чистый 99.99',
+  cur:1.1,preheat:'Подогрев до 100-150 °C при толщине от 8 мм',ppre:8},
+ {id:'cast',name:'Чугун',em:'🧱',hint:'Корпуса, картеры, блоки. Сложный металл — режим щадящий.',
+  mma:['ОЗЧ-2','ЦЧ-4','МНЧ-2'],mig:'—',tig:'—',gas:'—',
+  cur:0.65,preheat:'Подогрев 200-400 °C обязательно, медленное остывание',ppre:0},
+ {id:'copper',name:'Медь',em:'🔶',hint:'Шины, трубки, ёмкости. Теплоотвод большой — ток выше обычного.',
+  mma:['Комсомолец-100'],mig:'БрКМц3-1',tig:'БрКМц3-1',gas:'Аргон 99.99',
+  cur:1.2,preheat:'Подогрев 300-500 °C при толщине от 5 мм',ppre:5},
+ {id:'galv',name:'Оцинковка',em:'🛡️',hint:'Тонкий лист с цинком. Цинк выгорает — вентиляция обязательна.',
+  mma:['МР-3 С (Ø2-3, не более)'],mig:'Св-08Г2С (ER70S-6)',tig:'—',gas:'Углекислота CO2',
+  cur:0.9,preheat:'',ppre:0}
+];
+var METHODS=[
+ {id:'mma',name:'Электроды (ММА)',sub:'Бытовой инвертор, самый распространённый способ'},
+ {id:'mig',name:'Полуавтомат',sub:'Проволока в среде газа, быстро и чисто'},
+ {id:'tig',name:'Аргон (TIG)',sub:'Самый качественный шов: нержавейка, алюминий, медь'}
+];
+var TDIAM_MMA=[[2.5,2],[3.5,2.5],[4.5,3],[7,4],[99,5]];
+var TDIAM_MIG=[[2,'0.8'],[4,'1.0'],[99,'1.2']];
+var TDIAM_TIG=[[2.5,2],[4.5,3],[99,4]];
+var CUR_MMA={'2':[40,70],'2.5':[60,90],'3':[90,130],'4':[140,190],'5':[180,250]};
+var CUR_MIG={'0.8':[60,120],'1.0':[100,180],'1.2':[150,260]};
+var CUR_TIG={'2':[50,90],'3':[90,140],'4':[140,200]};
+var CUR_SIMPLE={'mma':{'2':55,'2.5':75,'3':110,'4':175,'5':210},
+                'mig':{'0.8':90,'1.0':140,'1.2':180},
+                'tig':{'2':70,'3':115,'4':190}};
+var MACHINES=[
+ {name:'Ресанта САИ-220',type:'ММА',amps:'до 220 А',pv:60,price:8900,note:'Простой инвертор для дома и дачи. Лёгкий, дешёвый.',
+  oz:'https://www.ozon.ru/search/?text=%D0%A0%D0%B5%D1%81%D0%B0%D0%BD%D1%82%D0%B0%20%D0%A1%D0%90%D0%98-220',wb:'https://www.wildberries.ru/catalog/0/search.aspx?search=%D0%A0%D0%B5%D1%81%D0%B0%D0%BD%D1%82%D0%B0%20%D0%A1%D0%90%D0%98-220'},
+ {name:'Сварог REAL ARC 200 (E201)',type:'ММА',amps:'до 200 А',pv:60,price:13500,note:'Надёжный профессиональный инвертор, живучая платформа.',
+  oz:'https://www.ozon.ru/search/?text=%D0%A1%D0%B2%D0%B0%D1%80%D0%BE%D0%B3%20REAL%20ARC%20200',wb:'https://www.wildberries.ru/catalog/0/search.aspx?search=%D0%A1%D0%B2%D0%B0%D1%80%D0%BE%D0%B3%20REAL%20ARC%20200'},
+ {name:'Fubag IRMMA 200',type:'ММА',amps:'до 200 А',pv:60,price:12000,note:'Уверенный старт, стабильная дуга, хорошая комплектация.',
+  oz:'https://www.ozon.ru/search/?text=Fubag%20IRMMA%20200',wb:'https://www.wildberries.ru/catalog/0/search.aspx?search=Fubag%20IRMMA%20200'},
+ {name:'Aurora CHICAGO 2000',type:'ММА/TIG',amps:'до 200 А',pv:60,price:18000,note:'Инвертор с добавкой TIG-режима: два способа в одном корпусе.',
+  oz:'https://www.ozon.ru/search/?text=Aurora%20CHICAGO%202000',wb:'https://www.wildberries.ru/catalog/0/search.aspx?search=Aurora%20CHICAGO%202000'},
+ {name:'Сварог TECH MIG 250 (R60)',type:'Полуавтомат',amps:'до 250 А',pv:60,price:28000,note:'Полноценный полуавтомат: гараж, цех, производственный поток.',
+  oz:'https://www.ozon.ru/search/?text=%D0%A1%D0%B2%D0%B0%D1%80%D0%BE%D0%B3%20TECH%20MIG%20250',wb:'https://www.wildberries.ru/catalog/0/search.aspx?search=%D0%A1%D0%B2%D0%B0%D1%80%D0%BE%D0%B3%20TECH%20MIG%20250'},
+ {name:'Aurora ADONIS 200 AC/DC',type:'TIG',amps:'до 200 А',pv:35,price:48000,note:'Аргонодуговая AC/DC: алюминий, нержавейка, медь — топ для TIG.',
+  oz:'https://www.ozon.ru/search/?text=Aurora%20ADONIS%20200',wb:'https://www.wildberries.ru/catalog/0/search.aspx?search=Aurora%20ADONIS%20200'}
+];
+var CATET=[[2,'3 мм','тонкий лист — катет 3, варить за один проход'],
+ [3,'4 мм','толщина 3 — катет 4'],
+ ['4-5','4-5 мм','катет примерно равен толщине листа'],
+ ['6-8','5-6 мм','двумя-тремя проходами'],
+ ['10-12','6-8 мм','несколько проходов, разделка кромок'],
+ ['15 и выше','8-10 мм','только по чертежу или согласованию с технологом']];
+var DEFECTS=[
+ {n:'Поры (газовые раковины)',cause:'Влага, ржавчина, масло, краска на металле; ветер сдувает газовую защиту.',fix:'Зачистить кромку до металла, просушить, варить без сквозняка. Полуавтомат: проверить подачу газа 12-15 л/мин.'},
+ {n:'Шлаковые включения',cause:'Мало тока, шлак не успевает стекать, узкая разделка кромки.',fix:'Прибавить ток 10-20 А, наклонять электрод по ходу шва, зачистить предыдущий слой от шлака.'},
+ {n:'Подрез кромки',cause:'Ток велик, электрод ведут слишком быстро вдоль края.',fix:'Снизить ток, вести электрод равномерно, у края задерживаться.'},
+ {n:'Непровар корня',cause:'Ток мал, зазор узкий, дуга не доходит до корня.',fix:'Увеличить ток, шире разделать кромку, вести дугу по корню, не мимо.'},
+ {n:'Прожог (дырка)',cause:'Ток велик для толщины, зазор слишком широкий.',fix:'Уменьшить ток, варить короткими участками с отбортовкой или подкладкой под шов.'},
+ {n:'Трещины (горячие/холодные)',cause:'Быстрое остывание, жёсткая конструкция, сера в металле.',fix:'Подогрев до 150-250 °C, варить с заходными/выходными пластинами, не остужать водой.'},
+ {n:'Наплывы (наплывы металла)',cause:'Слишком медленно, дуга короткая, растекание.',fix:'Ускорить движение, увеличить длину дуги на 1-2 мм.'},
+ {n:'Свищи (сквозные поры на выходе)',cause:'Грязь, влага, обрыв дуги на финишах.',fix:'Заваривать кратеры повторной дугой, зачистить начало/конец шва.'}
+];
+var DEF_RATE={hour:[1200,2500,3500],elec:200,wire:320,co2:1100,ar:1800,mix:1600};
+
+var state={page:'simple',metal:null,method:'mma',th:3,hints:true};
+function loadState(){
+ try{var s=JSON.parse(localStorage.getItem('weldCalc')||'{}');if(s&&s.hints!==undefined)state=s;}catch(e){}
+}
+function saveState(){try{localStorage.setItem('weldCalc',JSON.stringify(state));}catch(e){}}
+function getMetal(){for(var i=0;i<METALS.length;i++){if(METALS[i].id===state.metal)return METALS[i];}return null;}
+function getMethod(){for(var i=0;i<METHODS.length;i++){if(METHODS[i].id===state.method)return METHODS[i];}return null;}
+function pickDiam(method,t){
+ var table=method==='mma'?TDIAM_MMA:(method==='mig'?TDIAM_MIG:TDIAM_TIG);
+ for(var i=0;i<table.length;i++){if(t<=table[i][0])return String(table[i][1]);}
+ return String(table[table.length-1][1]);
+}
+function h(html){return '<div class="hint">'+html+'</div>';}
+function hintBox(txt){return state.hints?h('💡 '+txt):'';}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+/* ---------- ПРИВЕТСТВИЕ НОВИЧКА ---------- */
+function showWelcome(){
+ var c=METALS.map(function(m){return '<div class="wl-card" onclick="pickMetal(\''+m.id+'\')"><span class="em">'+m.em+'</span>'+m.name+'</div>';}).join('');
+ return '<div class="hero"><div class="em" style="font-size:40px">🔥</div>'+
+ '<h1>Сварочный калькулятор</h1><div class="sub">Всё о сварке: режимы, катеты, аппараты, дефекты, деньги</div></div>'+
+ '<div class="card"><h2>Что будешь варить?</h2><div class="sub">Тапни по металлу — расчёт подстроится под него.</div>'+
+ '<div class="wl-grid">'+c+'</div>'+
+ '<div class="btn" onclick="skipWelcome()">Пропустить — открыть все вкладки</div></div>'+
+ '<div class="note">Расчёты примерные: всегда проверяй режим на пробной пластине.</div>';
+}
+function pickMetal(id){state.metal=id;state.page='simple';saveState();render();}
+function skipWelcome(){state.metal=state.metal||'steel';state.page='simple';saveState();render();}
+
+/* ---------- ВКЛАДКА ПРОСТОЙ ---------- */
+function renderSimple(){
+ var m=getMetal();
+ if(!m)return showWelcome();
+ var meth=getMethod();
+ var tdiam=pickDiam(state.method,state.th);
+ var k=CUR_SIMPLE[state.method][tdiam]||CUR_SIMPLE[state.method][Object.keys(CUR_SIMPLE[state.method])[0]];
+ var base=k;
+ var cur=Math.round(base*m.cur*10)/10;
+ if(state.th>10)cur=Math.round(cur*1.08);
+ cur=Math.round(cur);
+ var range=(function(){
+   var t=state.method==='mma'?CUR_MMA:(state.method==='mig'?CUR_MIG:CUR_TIG);
+   var r=t[tdiam];if(!r)r=[0,0];
+   return [Math.round(r[0]*m.cur),Math.round(r[1]*m.cur)];
+ })();
+ var elecName=state.method==='mma'?m.mma[0]:(state.method==='mig'?m.mig:m.tig);
+ var gasName=state.method==='mig'?m.gas:(state.method==='tig'?'Аргон 99.99':'—');
+ var speedHint=state.method==='mma'?'15-20 см/мин — примерно пол электрода в минуту':
+   (state.method==='mig'?'30-45 см/мин — рука плавно ведёт, без рывков':'10-15 см/мин — медленно, горелка под углом 75°');
+ var canMig=m.id!=='cast'&&m.id!=='galv'?true:(m.id==='cast'?false:true);
+ if(m.id==='cast'&&state.method==='mig')canMig=false;
+ if(m.id==='cast'&&state.method==='tig')canMig=false;
+ var methBtns=METHODS.map(function(mm){
+   var dis=(m.id==='cast'&&mm.id!=='mma');
+   return '<div class="chip'+(state.method===mm.id?' sel':'')+(dis?' ':'')+'" onclick="'+(dis?'':'setMethod(\''+mm.id+'\')')+'" style="'+(dis?'opacity:.4':'')+'">'+mm.name+(dis?' (не подходит)':'')+'</div>';
+ }).join('');
+ var out=
+ '<div class="card res"><div class="lbl">Металл: '+m.em+' '+m.name+' · Способ: '+meth.name+'</div>'+
+ '<div style="margin:10px 0">Толщина металла: <span class="mid">'+state.th+' мм</span></div>'+
+ '<input type="range" min="1" max="20" step="1" value="'+state.th+'" onchange="setTh(this.value)" aria-label="Толщина металла">'+
+ hintBox('Толщина меряется по самой тонкой детали, которую ты варишь.')+
+ '<div class="lbl">Диаметр электрода / проволоки</div><div class="mid">Ø '+tdiam+(state.method==='mig'?' мм (проволока)':' мм (электрод)')+'</div>'+
+ '<div class="lbl" style="margin-top:10px">Ток на аппарате — выставляй это</div><div class="big">'+cur+' А</div>'+
+ '<div class="sub">Норма для этого диаметра: '+range[0]+'–'+range[1]+' А'+(m.id!=='steel'?' (с поправкой на '+m.name.toLowerCase()+')':'')+'</div>'+
+ '<div class="lbl" style="margin-top:10px">Материал</div><div>'+esc(elecName)+'</div>'+
+ (state.method!=='mma'?'<div class="lbl" style="margin-top:8px">Газ</div><div>'+esc(gasName)+'</div>':'')+
+ '<div class="lbl" style="margin-top:8px">Скорость шва</div><div>'+speedHint+'</div>'+
+ hintBox('Это стартовая точка. Слушай дугу: ровное шипение — режим верный; треск и брызги — ток велик; дуга не разжигается — ток мал.')+
+ (m.preheat?'<div class="hint warn">🔥 '+m.preheat+'</div>':'')+
+ (m.id==='galv'&&state.th>=2?'<div class="hint warn">⚠ Оцинковка от 2 мм: цинк выгорает, работать с вентиляцией или на улице.</div>':'')+
+ '</div>'+
+ '<div class="card"><h2>Способ сварки</h2>'+methBtns+'</div>'+
+ '<div class="card"><label class="toggle"><input type="checkbox" '+(state.hints?'checked':'')+' onchange="toggleHints(this)"> Простые подсказки 💡</label></div>'+
+ '<div class="card"><div class="btn acc" onclick="saveHist()">💾 Сохранить в историю</div></div>'+
+ hintBox('Не уверен — начни с нижней границы тока и поднимай, пока дуга не станет ровной.');
+ return out;
+}
+function setMethod(id){state.method=id;saveState();render();}
+function setTh(v){state.th=Math.max(1,Math.min(20,parseInt(v,10)||1));saveState();render();}
+
+/* ---------- ВКЛАДКА РАСЧЁТ (ЭКСПЕРТ) ---------- */
+function renderCalc(){
+ var m=getMetal();if(!m)return showWelcome();
+ var tdiam=pickDiam(state.method,state.th);
+ var r=(state.method==='mma'?CUR_MMA:(state.method==='mig'?CUR_MIG:CUR_TIG))[tdiam]||[0,0];
+ var pf=posF[state.pos]||1;
+ var lo=Math.round(r[0]*m.cur*pf),hi=Math.round(r[1]*m.cur*pf);
+ state.pos=state.pos||'flat';
+ var posF={'flat':1,'vert':0.9,'ceil':0.85};
+ var posL={'flat':'Нижнее — оптимально','vert':'Вертикаль — минус 10% тока','ceil':'Потолок — минус 15% тока'};
+ var d={
+  electrode:'Ø '+tdiam+' мм'+(state.method==='mig'?' проволока':' электрод'),
+  current:lo+'–'+hi+' А',
+  gas:state.method==='mma'?'—':(state.method==='mig'?'12–15 л/мин '+m.gas:'8–12 л/мин аргон'),
+  speed:state.method==='mma'?'15–20 см/мин':(state.method==='mig'?'30–45 см/мин':'10–15 см/мин'),
+  metal:m.mma.join(', '),
+  weave:state.th>6?'узкий валик, без поперечных колебаний':'лёгкие колебания допустимы'
+ };
+ var lenPerElec=state.method==='mma'?0.28:(state.method==='mig'?4.0:2.5);
+ var area=state.th*state.th/2;
+ var mass=Math.round(7.85*area/100*100)/100;
+ var out='<h1>Расчёт</h1>'+
+ '<div class="card res"><div class="lbl">Металл: '+m.em+' '+m.name+' · '+getMethod().name+'</div>'+
+ '<table>'+
+ '<tr><td>Диаметр</td><td class="mid">'+d.electrode+'</td></tr>'+
+ '<tr><td>Ток</td><td class="mid">'+d.current+'</td></tr>'+
+ '<tr><td>Газ</td><td>'+d.gas+'</td></tr>'+
+ '<tr><td>Скорость шва</td><td>'+d.speed+'</td></tr>'+
+ '<tr><td>Материал</td><td>'+esc(d.metal)+'</td></tr>'+
+ '<tr><td>Характер валика</td><td>'+d.weave+'</td></tr>'+
+ '</table>'+hintBox('Диапазон — норма по диаметру. Вертикаль и потолок: возьми нижнюю границу или минус 10-15%.')+
+ '</div>'+
+ '<div class="card"><h2>Положение шва</h2>'+
+ ['flat','vert','ceil'].map(function(p){return '<div class="chip'+(state.pos===p?' sel':'')+'" onclick="setPos(\''+p+'\')">'+({flat:'Нижнее',vert:'Вертикаль',ceil:'Потолок'})[p]+'</div>';}).join('')+
+ '<div class="sub">'+posL[state.pos]+'</div>'+
+ hintBox('Выбранное положение меняет ток: вертикаль — минус 10%, потолок — минус 15%.')+
+ '</div>'+
+ '<div class="card"><h2>Материальный расчёт</h2><table>'+
+ '<tr><td>Длина шва с одного электрода</td><td>~'+lenPerElec+' м</td></tr>'+
+ '<tr><td>Масса наплавки на 1 м шва ('+state.th+' мм)</td><td>~'+mass+' кг</td></tr>'+
+ '</table>'+
+ hintBox('Погонная энергия и расход материалов — справочно: для ориентира при закупке.')+
+ '</div>'+
+ '<div class="card"><div class="btn acc" onclick="saveHist()">💾 Сохранить в историю</div></div>';
+ return out;
+}
+function setPos(p){state.pos=p;saveState();render();}
+
+/* ---------- ВКЛАДКА АППАРАТЫ ---------- */
+function renderMachines(){
+ var m=getMetal();var need=(m&&m.id==='alum')?'AC/DC':(m&&m.id!=='steel'&&m.id!=='galv'?(m.id==='inox'?'любой':'TIG'):'');
+ var rows=MACHINES.map(function(x){
+  var fit='✔';
+  if(need==='AC/DC'&&x.type.indexOf('AC/DC')<0)fit='—';
+  if(m&&(m.id==='cast')&&x.type==='Полуавтомат')fit='—';
+  var btns='<a class="chip" href="'+x.oz+'" target="_blank" rel="noopener">Ozon</a>'+
+           '<a class="chip" href="'+x.wb+'" target="_blank" rel="noopener">WB</a>'+
+           '<a class="chip" href="https://www.vseinstrumenti.ru/search/?q='+encodeURIComponent(x.name)+'" target="_blank" rel="noopener">ВсеИнструменты</a>';
+  return '<div class="card"><b>'+x.name+'</b><div class="lbl">'+x.type+' · '+x.amps+' · ПВ '+x.pv+'% · ~'+x.price+' ₽</div>'+
+  '<div class="sub">'+x.note+(fit==='—'?' <span style="color:var(--bad)">Для выбранного металла не лучший выбор.</span>':'')+'</div>'+btns+'</div>';
+ }).join('');
+ return '<h1>Аппараты</h1>'+
+ hintBox('ПВ (продолжительность включения) — сколько времени аппарат может варить без паузы: 60% = 6 минут из 10.')+
+ '<div class="card">'+(need?'<b>Под твой металл ('+(getMetal()?getMetal().name:'')+')</b> нужен аппарат: '+need+'.':'Для стали обычной подойдёт любой ММА-инвертор.')+'</div>'+rows;
+}
+
+/* ---------- ВКЛАДКА КАТЕТ ---------- */
+function renderCatet(){
+ var rows=CATET.map(function(c){return '<tr><td>'+c[0]+' мм</td><td><b>'+c[1]+'</b></td><td>'+c[2]+'</td></tr>';}).join('');
+ var t=state.th;
+ var kmin=Math.max(3,Math.round(t*0.9));
+ var kmax=Math.round(t*1.2);
+ return '<h1>Катет углового шва</h1>'+
+ '<div class="card res"><div class="lbl">Для твоей толщины '+t+' мм</div>'+
+ '<div class="mid">Рекомендация: '+kmin+'–'+(kmax<kmin?kmin:kmax)+' мм</div>'+
+ hintBox('Катет — это сторона условного треугольника шва в углу. Слишком мал — шов слабый; слишком велик — металл коробится и расход растёт.')+
+ '</div>'+
+ '<div class="card"><table><tr><th>Толщина, мм</th><th>Катет</th><th>Комментарий</th></tr>'+rows+'</table>'+
+ '<div class="note">Ориентировочная таблица для угловых швов. Для несущих конструкций — по СП 16.13330 и чертежу.</div></div>'+
+ '<div class="card"><h2>Как измерить катет</h2><div class="sub">Приложи угольник или шаблон-катетомер к шву: сторона в шве и есть катет. Меньше нормы — доварить, больше — не страшно, но перерасход.</div></div>';
+}
+
+/* ---------- ВКЛАДКА ДЕФЕКТЫ ---------- */
+function renderDefects(){
+ var rows=DEFECTS.map(function(d){
+  return '<div class="card"><b>'+d.n+'</b><div class="lbl" style="margin-top:6px">Причина</div><div class="sub">'+d.cause+'</div>'+
+  '<div class="lbl">Что делать</div><div class="sub">'+d.fix+'</div></div>';
+ }).join('');
+ return '<h1>Дефекты шва</h1>'+
+ hintBox('Нашёл дефект — найди причину здесь и довари участок. Большинство проблем — грязь, ток или скорость.')+rows;
+}
+
+/* ---------- ВКЛАДКА РАСЦЕНКИ ---------- */
+function renderRates(){
+ if(!state.rates)state.rates={hour:2000,elec:200,wire:320,co2:1100,ar:1800};
+ var r=state.rates;
+ var areaK=state.th*state.th/2;
+ var massPerM=7.85*areaK/100;
+ var elecPerKg=45;
+ var costMMA=massPerM*elecPerKg*r.elec;
+ var costMIG=massPerM*1.15*r.wire;
+ var gasCostMIG=r.co2/12000*15*(state.method==='mig'?1:0);
+ var materials=Math.round(costMMA);
+ var out='<h1>Расценки и деньги</h1>'+
+ '<div class="card"><h2>Мои расценки (можно менять)</h2>'+
+ '<div class="lbl">Час работы, ₽</div><input type="number" value="'+r.hour+'" onchange="setRate(\'hour\',this.value)">'+
+ '<div class="lbl" style="margin-top:6px">Электроды, ₽/кг</div><input type="number" value="'+r.elec+'" onchange="setRate(\'elec\',this.value)">'+
+ '<div class="lbl" style="margin-top:6px">Проволока, ₽/кг</div><input type="number" value="'+r.wire+'" onchange="setRate(\'wire\',this.value)">'+
+ '<div class="lbl" style="margin-top:6px">Баллон CO2 40 л, ₽</div><input type="number" value="'+r.co2+'" onchange="setRate(\'co2\',this.value)">'+
+ '<div class="lbl" style="margin-top:6px">Баллон аргона 40 л, ₽</div><input type="number" value="'+r.ar+'" onchange="setRate(\'ar\',this.value)">'+
+ '</div>'+
+ '<div class="card res"><h2>Стоимость 1 метра шва (MMA, '+state.th+' мм)</h2>'+
+ '<div class="mid">~'+materials+' ₽ материалов</div>'+
+ '<div class="sub">Время на метр: ~'+Math.round(100/17)+' мин → работа ~'+Math.round(r.hour*6/60)+' ₽. Итого примерно <b>'+(materials+Math.round(r.hour*6/60))+' ₽/м</b>.</div>'+
+ hintBox('Расчёт ориентиром: реальная скорость зависит от положения и опыта. Свои цифры правь в полях выше.')+
+ '</div>'+
+ '<div class="card"><div class="btn acc" onclick="saveHist()">💾 Сохранить в историю</div></div>';
+ return out;
+}
+function setRate(k,v){v=parseFloat(v)||0;state.rates[k]=v;saveState();render();}
+
+/* ---------- ИСТОРИЯ ---------- */
+function getHist(){try{return JSON.parse(localStorage.getItem('weldHist')||'[]');}catch(e){return [];}}
+function saveHist(){
+ var m=getMetal();if(!m)return;
+ var e={ts:Date.now(),metal:m.name,method:getMethod().name,th:state.th,
+  diam:pickDiam(state.method,state.th),
+  cur:CUR_SIMPLE[state.method][pickDiam(state.method,state.th)]||0};
+ if(state.method==='mig'){e.cur=CUR_SIMPLE.mig[e.diam]||0;}
+ var h=getHist();h.unshift(e);if(h.length>200)h.pop();
+ try{localStorage.setItem('weldHist',JSON.stringify(h));}catch(err){}
+ render();
+}
+function delHist(i){var h=getHist();h.splice(i,1);try{localStorage.setItem('weldHist',JSON.stringify(h));}catch(e){}render();}
+function renderHistory(){
+ var h=getHist();
+ if(!h.length)return '<h1>История</h1><div class="card sub">Пока пусто. Сделай расчёт и нажми «Сохранить в историю».</div>';
+ var rows=h.map(function(x,i){
+  var d=new Date(x.ts);var s=('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+  return '<tr><td>'+s+'</td><td>'+x.metal+'</td><td>'+x.method+'</td><td>'+x.th+' мм</td><td>Ø'+x.diam+'</td><td><b>'+x.cur+' А</b></td><td><button class="del" onclick="delHist('+i+')">✕</button></td></tr>';
+ }).join('');
+ var csv='Дата;Металл;Способ;Толщина;Диаметр;Ток\n'+h.map(function(x){var d=new Date(x.ts);return d.toLocaleString('ru-RU')+';'+x.metal+';'+x.method+';'+x.th+' мм;Ø'+x.diam+';'+x.cur+' А';}).join('\n');
+ return '<h1>История расчётов</h1><div class="card"><table><tr><th>Дата</th><th>Металл</th><th>Способ</th><th>Толщ.</th><th>Ø</th><th>Ток</th><th></th></tr>'+rows+'</table>'+
+ '<a class="btn" href="data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv)+'" download="weld_history.csv">⬇ Скачать CSV</a></div>';
+}
+
+/* ---------- НАВИГАЦИЯ И ЗАПУСК ---------- */
+var TABS=[
+ {id:'simple',ic:'🏠',name:'Простой'},
+ {id:'calc',ic:'⚡',name:'Расчёт'},
+ {id:'machines',ic:'🔧',name:'Аппараты'},
+ {id:'catet',ic:'📐',name:'Катет'},
+ {id:'defects',ic:'🔍',name:'Дефекты'},
+ {id:'rates',ic:'💰',name:'Деньги'},
+ {id:'history',ic:'📜',name:'История'}
+];
+function render(){
+ var tabs=TABS.map(function(t){
+  return '<button class="tab'+(state.page===t.id?' on':'')+'" onclick="goPage(\''+t.id+'\')"><span class="ic">'+t.ic+'</span>'+t.name+'</button>';
+ }).join('');
+ document.getElementById('tabs').innerHTML=tabs;
+ var fn={'simple':renderSimple,'calc':renderCalc,'machines':renderMachines,'catet':renderCatet,'defects':renderDefects,'rates':renderRates,'history':renderHistory};
+ document.getElementById('app').innerHTML=(fn[state.page]||renderSimple)();
+}
+function goPage(id){state.page=id;saveState();render();}
+function toggleHints(el){state.hints=el.checked;saveState();render();}
+
+loadState();
+render();
+</script>
+</body>
+</html>
