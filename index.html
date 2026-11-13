@@ -379,6 +379,59 @@ function toggleHints(el){state.hints=el.checked;saveState();render();}
 
 loadState();
 render();
-</script>
+<script>
+ const regionPriceRanges = {
+    'crimea': { butt_simple: '800–1200 ₽', frame_assembly: '1100–1800 ₽', stainless: '×1.8–2.2' },
+    'moscow': { butt_simple: '1200–2000 ₽', frame_assembly: '1800–3000 ₽', stainless: '×1.8–2.2' },
+    'spb': { butt_simple: '1000–1700 ₽', frame_assembly: '1500–2500 ₽', stainless: '×1.8–2.2' },
+    'krasnodar': { butt_simple: '900–1400 ₽', frame_assembly: '1300–2100 ₽', stainless: '×1.8–2.2' },
+    'ural': { butt_simple: '900–1300 ₽', frame_assembly: '1200–1900 ₽', stainless: '×1.8–2.2' },
+    'siberia': { butt_simple: '850–1300 ₽', frame_assembly: '1100–1800 ₽', stainless: '×1.8–2.2' },
+    'other': { butt_simple: '800–1500 ₽', frame_assembly: '1000–2000 ₽', stainless: '×1.8–2.2' }
+  };
+ 
+  function showPrices() {
+    const region = 'crimea'; // По умолчанию Крым, так как выбора региона в текущей форме нет
+    const data = regionPriceRanges[region];
+    
+    let block = document.getElementById('price-hint-block');
+    if (!block) {
+      block = document.createElement('div');
+      block.id = 'price-hint-block';
+      // Стили для красивого блока с ценами
+      block.style.cssText = "margin: 20px 0; padding: 15px; background: #e3f2fd; border-radius: 8px; border-left: 5px solid #2196F3; font-family: sans-serif; color: #333;";
+      
+      // Пытаемся вставить блок сразу после основного контейнера #app
+      const app = document.getElementById('app');
+      if (app) app.after(block);
+      else document.body.appendChild(block);
+    }
+
+    block.innerHTML = `
+      <strong>Средние цены (ориентир для Крыма):</strong><br>
+      • Стыковой шов (простой): \${data.butt_simple}<br>
+      • Сборка каркаса/рамы: \${data.frame_assembly}<br>
+      • Нержавейка/Алюминий: коэффициент \${data.stainless}
+      <br><small style="color:#666; display:block; margin-top:8px;">Цены ориентировочные, зависят от сложности и доступа к месту работ.</small>
+    `;
+  }
+
+  // Создаем кнопку, если её еще нет
+  if (!document.getElementById('btn-prices-auto')) {
+    const btn = document.createElement('button');
+    btn.id = 'btn-prices-auto';
+    btn.innerText = '🗺️ Средние цены по региону';
+    btn.style.cssText = "padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; margin-top: 10px;";
+    btn.onclick = showPrices;
+    
+    // Логика вставки кнопки: ищем последнее поле ввода на странице и ставим кнопку после него
+    const inputs = document.querySelectorAll('input, select, textarea');
+    if (inputs.length > 0) {
+        inputs[inputs.length - 1].parentNode.appendChild(btn);
+    } else {
+        // Если полей нет, просто кидаем в конец body
+        document.body.appendChild(btn);
+    }
+  }</script>
 </body>
 </html>
