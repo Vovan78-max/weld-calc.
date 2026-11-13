@@ -415,23 +415,29 @@ render();
       <br><small style="color:#666; display:block; margin-top:8px;">Цены ориентировочные, зависят от сложности и доступа к месту работ.</small>
     `;
   }
+// Создаем кнопку, если её ещё нет
+if (!document.getElementById('btn-prices-auto')) {
+  const btn = document.createElement('button');
+  btn.id = 'btn-prices-auto';
+  
+  // Твои идеальные строки со стилями и текстом
+  btn.innerText = '🗺️ Средние цены по региону';
+  btn.style.cssText = "padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; margin-top: 10px;";
+  btn.onclick = showPrices;
 
-  // Создаем кнопку, если её еще нет
-  if (!document.getElementById('btn-prices-auto')) {
-    const btn = document.createElement('button');
-    btn.id = 'btn-prices-auto';
-    btn.innerText = '🗺️ Средние цены по региону';
-    btn.style.cssText = "padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; margin-top: 10px;";
-    btn.onclick = showPrices;
-    
-    // Логика вставки кнопки: ищем последнее поле ввода на странице и ставим кнопку после него
-    const inputs = document.querySelectorAll('input, select, textarea');
-    if (inputs.length > 0) {
-        inputs[inputs.length - 1].parentNode.appendChild(btn);
-    } else {
-        // Если полей нет, просто кидаем в конец body
-        document.body.appendChild(btn);
-    }
+  // Логика вставки кнопки: ищем последнее поле ввода на странице
+  const inputs = document.querySelectorAll('input, select, textarea');
+  
+  if (inputs.length > 0) {
+    // Вставляем кнопку сразу после последнего поля ввода
+    inputs[inputs.length - 1].parentNode.appendChild(btn);
+  } else {
+    // Если полей нет, кидаем кнопку в самый низ страницы
+    document.body.appendChild(btn);
+  }
+}
+
+  
   }</script>
 </body>
 </html>
