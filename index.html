@@ -67,9 +67,10 @@ window.onerror = function(msg, src, line) {
   document.body.insertAdjacentHTML('beforeend',
   '<div style="background:#fff;color:#c00;padding:10px;font-size:14px">Ошибка: ' + msg + ' (строка ' + line + ')</div>');
 };
+</script>
+<script>
 
-var METALS=[
- {id:'steel',name:'Сталь обычная',em:'🔩',hint:'Ст3, 09Г2С — самое частое: каркасы, гаражи, ворота, прицепы.',
+var METALS=[ {id:'steel',name:'Сталь обычная',em:'🔩',hint:'Ст3, 09Г2С — самое частое: каркасы, гаражи, ворота, прицепы.',
   mma:['МР-3 С','АНО-21','УОНИ-13/55'],mig:'Св-08Г2С (ER70S-6)',tig:'ВТ-1-4',gas:'Углекислота CO2 или смесь 80/20',
   cur:1.0,preheat:'',ppre:0},
  {id:'inox',name:'Нержавейка',em:'✨',hint:'12Х18Н10Т, AISI 304/321 — ёмкости, трапы, декор.',
