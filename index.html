@@ -63,6 +63,10 @@ th{color:var(--dim);font-weight:600}
 <div id="app" class="app"></div>
 <nav class="tabs" id="tabs"></nav>
 <script>
+window.onerror = function(msg, src, line) {
+  document.body.insertAdjacentHTML('beforeend',
+  '<div style="background:#fff;color:#c00;padding:10px;font-size:14px">Ошибка: ' + msg + ' (строка ' + line + ')</div>');
+};
 
 var METALS=[
  {id:'steel',name:'Сталь обычная',em:'🔩',hint:'Ст3, 09Г2С — самое частое: каркасы, гаражи, ворота, прицепы.',
