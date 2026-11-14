@@ -408,38 +408,17 @@ render();
       // Стили для красивого блока с ценами
       block.style.cssText = "margin: 20px 0; padding: 15px; background: #e3f2fd; border-radius: 8px; border-left: 5px solid #2196F3; font-family: sans-serif; color: #333;";
       block.innerHTML = `
-
-  <strong>Средние цены (ориентир для Крыма):</strong>
-  <ul>
-    <li>Стыковой шов (простой): \${data.butt_simple}</li>
-    <li>Сборка каркаса/рамы: \${data.frame_assembly}</li>
-    <li>Нержавейка/Алюминий: коэффициент \${data.stainless}</li>
-  </ul>
-  <small style="color:#666; display:block; margin-top:8px;">
-    Цены ориентировочные, зависят от сложности и доступа к месту работ.
-  </small>`;
+  <div style="background:#f0f4f8; padding:16px; border-radius:8px; color:#333; font-family:sans-serif;">
+    <strong>Средние цены (ориентир для Крыма):</strong>
+    <ul style="margin-top:8px; padding-left:20px; line-height:1.5;">
+      <li>Стыковой шов (простой): ${data.butt_simple}</li>
+      <li>Сборка каркаса/рамы: ${data.frame_assembly}</li>
+      <li>Нержавейка/Алюминий: коэффициент ${data.stainless}</li>
+    </ul>
+    <small style="color:#666; display:block; margin-top:8px; font-size:0.85em;">
+      Цены ориентировочные, зависят от сложности и доступа к месту работ.
+    </small>
+  </div>
+`;
 
       
-
-    block.innerHTML = `
-      <strong>Средние цены (ориентир для Крыма):</strong><br>
-      • Стыковой шов (простой): \${data.butt_simple}<br>
-      • Сборка каркаса/рамы: \${data.frame_assembly}<br>
-      • Нержавейка/Алюминий: коэффициент \${data.stainless}
-      <br><small style="color:#666; display:block; margin-top:8px;">Цены ориентировочные, зависят от сложности и доступа к месту работ.</small>
-    `;
-  }
-  
-  
-// Добавляем кнопку на страницу
-const btn = document.createElement('button');
-btn.id = 'btn-prices-auto';
-btn.innerText = '📊 Средние цены по региону';
-btn.style.cssText = 'padding: 10px 20px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 5px; font-size: 16px;';
-btn.onclick = showPrices;
-const appBox = document.getElementById('app');
-if (appBox) { appBox.after(btn); } else { document.body.appendChild(btn); }
-  
- </script>
-</body>
-</html>
