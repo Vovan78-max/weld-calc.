@@ -408,13 +408,18 @@ render();
       // Стили для красивого блока с ценами
       block.style.cssText = "margin: 20px 0; padding: 15px; background: #e3f2fd; border-radius: 8px; border-left: 5px solid #2196F3; font-family: sans-serif; color: #333;";
       block.innerHTML = `
+block.innerHTML = `
+  <strong>Средние цены (ориентир для Крыма):</strong>
+  <ul>
+    <li>Стыковой шов (простой): \${data.butt_simple}</li>
+    <li>Сборка каркаса/рамы: \${data.frame_assembly}</li>
+    <li>Нержавейка/Алюминий: коэффициент \${data.stainless}</li>
+  </ul>
+  <small style="color:#666; display:block; margin-top:8px;">
+    Цены ориентировочные, зависят от сложности и доступа к месту работ.
+  </small>`;
 
-      // Пытаемся вставить блок сразу после основного контейнера #app
-      const app = document.getElementById('app');
-      if (app) app.after(block);
-      else document.body.appendChild(block);
-    }
-`;
+      
 
     block.innerHTML = `
       <strong>Средние цены (ориентир для Крыма):</strong><br>
