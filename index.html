@@ -421,29 +421,31 @@ render();
     'siberia': { butt_simple: '850–1300 ₽', frame_assembly: '1100–1800 ₽', stainless: '×1.8–2.2' },
     'other': { butt_simple: '800–1500 ₽', frame_assembly: '1000–2000 ₽', stainless: '×1.8–2.2' }
   };
- 
-  function showPrices() {
-    const region = 'crimea'; // По умолчанию Крым, так как выбора региона в текущей форме нет
-    const data = regionPriceRanges[region];
-    
-    let block = document.getElementById('price-hint-block');
-    if (!block) {
-      block = document.createElement('div');
-      block.id = 'price-hint-block';
-      // Стили для красивого блока с ценами
-      block.style.cssText = "margin: 20px 0; padding: 15px; background: #e3f2fd; border-radius: 8px; border-left: 5px solid #2196F3; font-family: sans-serif; color: #333;";
-      block.innerHTML = `
-  <div style="background:#f0f4f8; padding:16px; border-radius:8px; color:#333; font-family:sans-serif;">
-    <strong>Средние цены (ориентир для Крыма):</strong>
-    <ul style="margin-top:8px; padding-left:20px; line-height:1.5;">
-      <li>Стыковой шов (простой): ${data.butt_simple}</li>
-      <li>Сборка каркаса/рамы: ${data.frame_assembly}</li>
-      <li>Нержавейка/Алюминий: коэффициент ${data.stainless}</li>
-    </ul>
-    <small style="color:#666; display:block; margin-top:8px; font-size:0.85em;">
-      Цены ориентировочные, зависят от сложности и доступа к месту работ.
-    </small>
-  </div>
-`;
+ function showPrices(){
+  var block=document.getElementById('price-hint-block');
+  if(block){
+    block.remove();
+    return;
+  }
+  var data=regionPriceRanges['crimea']||{butt_simple:'800–1200 ₽',frame_assembly:'1500–2500 ₽',stainless:'×1.5 к обычной цене'};
+  block=document.createElement('div');
+  block.id='price-hint-block';
+  block.style.cssText='margin:20px 0;';
+  block.innerHTML=
+  '<div style="background:#f0f4f8; padding:16px; border-radius:8px; color:#333; font-family:sans-serif;">'+
+  '<strong>Средние цены (ориентир для Крыма):</strong>'+
+  '<ul style="margin-top:8px; padding-left:20px; line-height:1.5;">'+
+  '<li>Стыковой шов (простой): '+data.butt_simple+'</li>'+
+  '<li>Сборка каркаса/рамы: '+data.frame_assembly+'</li>'+
+  '<li>Нержавейка/Алюминий: коэффициент '+data.stainless+'</li>'+
+  '</ul>'+
+  '<small style="color:#666; display:block; margin-top:8px; font-size:0.85em;">'+
+  'Цены ориентировочные, зависят от сложности и доступа к месту работ.'+
+  '</small>'+
+  '</div>';
+  document.body.appendChild(block);
+}
 
-      
+  
+    
+    
