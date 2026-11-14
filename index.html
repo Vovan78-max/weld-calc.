@@ -220,13 +220,12 @@ function renderCalc(){
  var m=getMetal();if(!m)return showWelcome();
  var tdiam=pickDiam(state.method,state.th);
  var r=(state.method==='mma'?CUR_MMA:(state.method==='mig'?CUR_MIG:CUR_TIG))[tdiam]||[0,0];
- 
  state.pos=state.pos||'flat';
  var posF={'flat':1,'vert':0.9,'ceil':0.85};
  var posL={'flat':'Нижнее — оптимально','vert':'Вертикаль — минус 10% тока','ceil':'Потолок — минус 15% тока'};
-  var pf=posF[state.pos]||1;
+ var pf=posF[state.pos]||1;
  var lo=Math.round(r[0]*m.cur*pf),hi=Math.round(r[1]*m.cur*pf);
-var d={
+ var d={
   electrode:'Ø '+tdiam+' мм'+(state.method==='mig'?' проволока':' электрод'),
   current:lo+'–'+hi+' А',
   gas:state.method==='mma'?'—':(state.method==='mig'?'12–15 л/мин '+m.gas:'8–12 л/мин аргон'),
@@ -263,6 +262,7 @@ var d={
  return out;
 }
 function setPos(p){state.pos=p;saveState();render();}
+
 
 /* ---------- ВКЛАДКА АППАРАТЫ ---------- */
 function renderMachines(){
