@@ -263,7 +263,29 @@ function renderCalc(){
  '<div class="card"><div class="btn acc" onclick="saveHist()">💾 Сохранить в историю</div></div>';
  return out;
 }
-function setPos(p){state.pos=p;saveState();render();}
+function setPos(p){state.pos=p;saveState();render();}function showPrices(){
+  var data={butt_simple:'800–1200 ₽',frame_assembly:'1500–2500 ₽',stainless:'×1.5 к обычной цене'};
+  var block=document.getElementById('price-hint-block');
+  if(!block){
+    block=document.createElement('div');
+    block.id='price-hint-block';
+    block.style.cssText='margin:20px 0;';
+    document.body.appendChild(block);
+  }
+  block.innerHTML=
+  '<div style="background:#f0f4f8; padding:16px; border-radius:8px; color:#333; font-family:sans-serif;">'+
+  '<strong>Средние цены (ориентир для Крыма):</strong>'+
+  '<ul style="margin-top:8px; padding-left:20px; line-height:1.5;">'+
+  '<li>Стыковой шов (простой): '+data.butt_simple+'</li>'+
+  '<li>Сборка каркаса/рамы: '+data.frame_assembly+'</li>'+
+  '<li>Нержавейка/Алюминий: коэффициент '+data.stainless+'</li>'+
+  '</ul>'+
+  '<small style="color:#666; display:block; margin-top:8px; font-size:0.85em;">'+
+  'Цены ориентировочные, зависят от сложности и доступа к месту работ.'+
+  '</small>'+
+  '</div>';
+}
+
 
 
 /* ---------- ВКЛАДКА АППАРАТЫ ---------- */
