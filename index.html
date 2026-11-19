@@ -264,7 +264,7 @@ function renderCalc(){
  return out;
 }
 function setPos(p){state.pos=p;saveState();render();}
- 
+
 /* ---------- ВКЛАДКА АППАРАТЫ ---------- */
 function renderMachines(){
  var m=getMetal();var need=(m&&m.id==='alum')?'AC/DC':(m&&m.id!=='steel'&&m.id!=='galv'?(m.id==='inox'?'любой':'TIG'):'');
